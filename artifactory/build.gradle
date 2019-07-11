@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'maven-publish'
 
 mainClassName = 'hello.HelloWorld'
 
@@ -29,3 +30,52 @@ dependencies {
 
 // tag::wrapper[]
 // end::wrapper[]
+
+// publication
+publishing {
+    publications {
+        jar(MavenPublication) {
+            groupId 'academy.newtech'
+            artifactId 'gs-gradle'
+            version '1.0'
+            from components.java
+        }
+    }
+}
+
+// artifactory configuration
+buildscript {
+    repositories {
+        jcenter()
+
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+artifactory {
+    publish {
+        repository {
+            repoKey = 'gradle-dev-local'
+            maven = true
+        }
+        defaults {
+            publications('jar')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'gradle-dev'
+            maven = true
+
+        }
+    }
+}
